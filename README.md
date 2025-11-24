@@ -1,4 +1,3 @@
-````markdown
 # Hybrid E-Commerce Order & Log System 🚀
 
 ![Project Status](https://img.shields.io/badge/status-completed-success)
@@ -29,7 +28,6 @@ Client Request (POST /checkout)
       │ (HTTP Request via Internal Network)
       ▼
 [ Node.js Container ] ────(Store Log)─────▶ [ MongoDB Container ]
-````
 
 -----
 
