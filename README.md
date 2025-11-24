@@ -145,10 +145,7 @@ By building this project, I demonstrated understanding in:
 **Bryan Chan**
 *Aspiring Backend Developer | Open for Internship*
 
-```
-
 ### Tips Tambahan:
 1.  **Ganti `<YOUR_REPOSITORY_URL>`**: Masukkan link GitHub Anda nanti.
 2.  **Ganti `[Your Name]`**: Masukkan nama lengkap Anda.
 3.  **Diagram**: Bagian diagram di atas menggunakan format teks sederhana yang terlihat rapi di GitHub. Ini akan membuat README Anda terlihat sangat "geeky" dan teknis (nilai plus!).
-```
