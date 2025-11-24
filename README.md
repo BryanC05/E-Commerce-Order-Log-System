@@ -19,7 +19,7 @@ The system consists of two distinct services communicating via an internal Docke
 2.  **Log Service (Node.js + MongoDB):** Handles Activity Logging. It captures system events asynchronously for audit trails.
 
 **Data Flow:**
-```mermaid
+````markdown
 Client Request (POST /checkout)
       │
       ▼
@@ -56,7 +56,7 @@ cd <YOUR_PROJECT_FOLDER>
 
 ```bash
 docker-compose up -d --build
-```
+````
 
 *Wait for a few minutes for the initial build and image download.*
 
