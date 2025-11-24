@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # --- LARAVEL APP ---
+  laravel-app:
+    build:
+      context: ./main-app
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./main-app:/var/www/html
+    depends_on:
+      - mysql-db
+    networks:
+      - app-network
+
+  # --- MYSQL DATABASE ---
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_DATABASE: ecommerce_db
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+
+  # --- NODE JS LOG SERVICE ---
+  node-logger:
+    build:
+      context: ./log-service
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      MONGO_URI: mongodb://mongo-db:27017/logs_db
+    depends_on:
+      - mongo-db
+    networks:
+      - app-network
+
+  # --- MONGODB DATABASE ---
+  mongo-db:
+    image: mongo:latest
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
