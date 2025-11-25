@@ -15,29 +15,32 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
+    # --- TAMBAHAN PENTING: Install Vendor di Host ---
+    # Kita install library PHP di server GitHub dulu.
+    # Supaya saat folder di-mount ke Docker, isinya TIDAK KOSONG.
+    - name: Install Vendor on Host
+      run: |
+        cd main-app
+        composer install --ignore-platform-reqs --no-interaction --prefer-dist
+
     # 2. Setup Docker & Jalankan Container
     - name: Start Containers
       run: |
-        # --- PERBAIKAN: Buat .env DULUAN sebelum Docker nyala ---
+        # Buat .env
         cp main-app/.env.example main-app/.env
         
-        # --- PERBAIKAN UTAMA: Hapus Mapping Volume ---
-        # Ini mencegah folder host menimpa folder container yang sudah ada vendor-nya
-        sed -i '/\.\/main-app:\/var\/www\/html/d' docker-compose.yml
-        
+        # Nyalakan Docker
         docker compose up -d --build
         echo "Waiting for containers to wake up..."
         sleep 60
         
-        # --- DEBUG: Cek log jika ada yang mati ---
+        # Cek log jika ada yang mati (untuk debugging)
         docker compose logs laravel-app
 
     # 3. Setup Laravel
     - name: Setup Laravel
       run: |
-        # (Baris cp .env SUDAH DIHAPUS DARI SINI)
-        
-        # Update config env untuk Docker
+        # Update config env agar connect ke container mysql-db
         sed -i 's/DB_CONNECTION=sqlite/DB_CONNECTION=mysql/g' main-app/.env
         sed -i 's/# DB_HOST=127.0.0.1/DB_HOST=mysql-db/g' main-app/.env
         sed -i 's/# DB_HOST=mysql/DB_HOST=mysql-db/g' main-app/.env
@@ -46,13 +49,24 @@ jobs:
         sed -i 's/# DB_USERNAME=root/DB_USERNAME=root/g' main-app/.env
         sed -i 's/# DB_PASSWORD=/DB_PASSWORD=rootpassword/g' main-app/.env
         
-        # Permission Fix
+        # Permission Fix (PENTING AGAR TIDAK ERROR 500)
         docker compose exec -T laravel-app chmod -R 777 storage bootstrap/cache
         
-        # Install dependencies (Safety net)
-        docker compose exec -T laravel-app composer install --no-interaction --prefer-dist
+        # Generate Key
         docker compose exec -T laravel-app php artisan key:generate
         
         echo "Running Migrations..."
         docker compose exec -T laravel-app php artisan migrate --force
         docker compose exec -T laravel-app php artisan install:api
+
+    # 4. Cek Status Container
+    - name: Check Container Status
+      run: docker compose ps
+
+    # 5. Setup k6 (Load Testing Tool)
+    - name: Setup k6
+      uses: grafana/setup-k6-action@v1
+
+    # 6. Jalankan Load Test
+    - name: Run k6 Load Test
+      run: k6 run load-test.js
