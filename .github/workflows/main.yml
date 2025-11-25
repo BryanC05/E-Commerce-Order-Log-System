@@ -1,0 +1,57 @@
+name: E-Commerce CI Pipeline
+
+# Kapan pipeline ini berjalan?
+# Setiap kali ada push ke branch main atau pull request
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Ambil Kodingan dari Repo
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. Setup Docker & Jalankan Container
+    - name: Start Containers
+      run: |
+        docker-compose up -d --build
+        echo "Waiting for containers to wake up..."
+        sleep 30 # Beri waktu 30 detik agar MySQL & Mongo siap
+
+    # 3. Setup Laravel (Environment & Migrations)
+    # Kita copy .env.example jadi .env dan set DB ke mysql (bukan sqlite)
+    - name: Setup Laravel
+      run: |
+        cp main-app/.env.example main-app/.env
+        # Paksa config env agar connect ke container mysql-db
+        sed -i 's/DB_CONNECTION=sqlite/DB_CONNECTION=mysql/g' main-app/.env
+        sed -i 's/# DB_HOST=127.0.0.1/DB_HOST=mysql-db/g' main-app/.env
+        sed -i 's/# DB_PORT=3306/DB_PORT=3306/g' main-app/.env
+        sed -i 's/# DB_DATABASE=laravel/DB_DATABASE=ecommerce_db/g' main-app/.env
+        sed -i 's/# DB_USERNAME=root/DB_USERNAME=root/g' main-app/.env
+        sed -i 's/# DB_PASSWORD=/DB_PASSWORD=rootpassword/g' main-app/.env
+        
+        # Install dependencies & Prepare DB
+        docker-compose exec -T laravel-app composer install
+        docker-compose exec -T laravel-app php artisan key:generate
+        docker-compose exec -T laravel-app php artisan migrate --force
+        docker-compose exec -T laravel-app php artisan install:api
+
+    # 4. Cek Status Container (Debugging)
+    - name: Check Container Status
+      run: docker-compose ps
+
+    # 5. Setup k6 (Load Testing Tool)
+    - name: Setup k6
+      uses: grafana/setup-k6-action@v1
+
+    # 6. Jalankan Load Test
+    # Jika test gagal (error rate tinggi/transaksi gagal), pipeline akan merah (failed)
+    - name: Run k6 Load Test
+      run: k6 run load-test.js
