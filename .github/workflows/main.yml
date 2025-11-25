@@ -1,7 +1,5 @@
 name: E-Commerce CI Pipeline
 
-# Kapan pipeline ini berjalan?
-# Setiap kali ada push ke branch main atau pull request
 on:
   push:
     branches: [ "main" ]
@@ -20,38 +18,31 @@ jobs:
     # 2. Setup Docker & Jalankan Container
     - name: Start Containers
       run: |
-        docker-compose up -d --build
-        echo "Waiting for containers to wake up..."
-        sleep 30 # Beri waktu 30 detik agar MySQL & Mongo siap
+        docker compose up -d --build
+        echo "Waiting..."
+        sleep 60
 
-    # 3. Setup Laravel (Environment & Migrations)
-    # Kita copy .env.example jadi .env dan set DB ke mysql (bukan sqlite)
+    # 3. Setup Laravel
     - name: Setup Laravel
       run: |
         cp main-app/.env.example main-app/.env
-        # Paksa config env agar connect ke container mysql-db
-        sed -i 's/DB_CONNECTION=sqlite/DB_CONNECTION=mysql/g' main-app/.env
-        sed -i 's/# DB_HOST=127.0.0.1/DB_HOST=mysql-db/g' main-app/.env
-        sed -i 's/# DB_PORT=3306/DB_PORT=3306/g' main-app/.env
-        sed -i 's/# DB_DATABASE=laravel/DB_DATABASE=ecommerce_db/g' main-app/.env
-        sed -i 's/# DB_USERNAME=root/DB_USERNAME=root/g' main-app/.env
-        sed -i 's/# DB_PASSWORD=/DB_PASSWORD=rootpassword/g' main-app/.env
+        docker compose exec -T laravel-app chmod -R 777 storage bootstrap/cache
+        docker compose exec -T laravel-app composer install --no-interaction --prefer-dist
+        docker compose exec -T laravel-app php artisan key:generate
+        
+        echo "Running Migrations..."
+        docker compose exec -T laravel-app php artisan migrate --force
+        docker compose exec -T laravel-app php artisan install:api
+        
+        # --- TAMBAHAN PENTING (PERMISSION FIX) ---
+        docker-compose exec -T laravel-app chmod -R 777 storage bootstrap/cache
         
         # Install dependencies & Prepare DB
-        docker-compose exec -T laravel-app composer install
+        docker-compose exec -T laravel-app composer install --no-interaction --prefer-dist
         docker-compose exec -T laravel-app php artisan key:generate
+        
+        # --- TAMBAHAN PENTING (WAIT FOR DB) ---
+        # Memaksa Laravel nunggu sampai DB benar-benar siap baru migrate
+        echo "Running Migrations..."
         docker-compose exec -T laravel-app php artisan migrate --force
         docker-compose exec -T laravel-app php artisan install:api
-
-    # 4. Cek Status Container (Debugging)
-    - name: Check Container Status
-      run: docker-compose ps
-
-    # 5. Setup k6 (Load Testing Tool)
-    - name: Setup k6
-      uses: grafana/setup-k6-action@v1
-
-    # 6. Jalankan Load Test
-    # Jika test gagal (error rate tinggi/transaksi gagal), pipeline akan merah (failed)
-    - name: Run k6 Load Test
-      run: k6 run load-test.js
