@@ -18,31 +18,41 @@ jobs:
     # 2. Setup Docker & Jalankan Container
     - name: Start Containers
       run: |
+        # --- PERBAIKAN: Buat .env DULUAN sebelum Docker nyala ---
+        cp main-app/.env.example main-app/.env
+        
+        # --- PERBAIKAN UTAMA: Hapus Mapping Volume ---
+        # Ini mencegah folder host menimpa folder container yang sudah ada vendor-nya
+        sed -i '/\.\/main-app:\/var\/www\/html/d' docker-compose.yml
+        
         docker compose up -d --build
-        echo "Waiting..."
+        echo "Waiting for containers to wake up..."
         sleep 60
+        
+        # --- DEBUG: Cek log jika ada yang mati ---
+        docker compose logs laravel-app
 
     # 3. Setup Laravel
     - name: Setup Laravel
       run: |
-        cp main-app/.env.example main-app/.env
+        # (Baris cp .env SUDAH DIHAPUS DARI SINI)
+        
+        # Update config env untuk Docker
+        sed -i 's/DB_CONNECTION=sqlite/DB_CONNECTION=mysql/g' main-app/.env
+        sed -i 's/# DB_HOST=127.0.0.1/DB_HOST=mysql-db/g' main-app/.env
+        sed -i 's/# DB_HOST=mysql/DB_HOST=mysql-db/g' main-app/.env
+        sed -i 's/# DB_PORT=3306/DB_PORT=3306/g' main-app/.env
+        sed -i 's/# DB_DATABASE=laravel/DB_DATABASE=ecommerce_db/g' main-app/.env
+        sed -i 's/# DB_USERNAME=root/DB_USERNAME=root/g' main-app/.env
+        sed -i 's/# DB_PASSWORD=/DB_PASSWORD=rootpassword/g' main-app/.env
+        
+        # Permission Fix
         docker compose exec -T laravel-app chmod -R 777 storage bootstrap/cache
+        
+        # Install dependencies (Safety net)
         docker compose exec -T laravel-app composer install --no-interaction --prefer-dist
         docker compose exec -T laravel-app php artisan key:generate
         
         echo "Running Migrations..."
         docker compose exec -T laravel-app php artisan migrate --force
         docker compose exec -T laravel-app php artisan install:api
-        
-        # --- TAMBAHAN PENTING (PERMISSION FIX) ---
-        docker-compose exec -T laravel-app chmod -R 777 storage bootstrap/cache
-        
-        # Install dependencies & Prepare DB
-        docker-compose exec -T laravel-app composer install --no-interaction --prefer-dist
-        docker-compose exec -T laravel-app php artisan key:generate
-        
-        # --- TAMBAHAN PENTING (WAIT FOR DB) ---
-        # Memaksa Laravel nunggu sampai DB benar-benar siap baru migrate
-        echo "Running Migrations..."
-        docker-compose exec -T laravel-app php artisan migrate --force
-        docker-compose exec -T laravel-app php artisan install:api
