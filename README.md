@@ -43,7 +43,6 @@ To ensure system stability under high traffic, I implemented an automated load t
 
 ### Test Script (`load-test.js`)
 
-```javascript
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
