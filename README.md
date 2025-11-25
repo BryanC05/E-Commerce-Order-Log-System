@@ -20,7 +20,7 @@ The system consists of two distinct services communicating via an internal Docke
 2.  **Logging Service (Node.js + MongoDB):** Handles Activity Logging. Captures high-volume system events asynchronously to avoid blocking the main thread.
 
 **Data Flow:**
-
+```mermaid
 [ Client ] ──(POST /checkout)──▶ [ Laravel API ] ────(SQL Transaction)───▶ [ MySQL ]
                                       │
                                       ▼
@@ -28,7 +28,7 @@ The system consists of two distinct services communicating via an internal Docke
                                       │
                                       ▼
                                 [ Node.js Service ] ──(Write Log)──▶ [ MongoDB ]
-
+```
 -----
 
 ## 🧪 Quality Assurance & Performance (QC)
@@ -124,8 +124,5 @@ k6 run load-test.js
 
 ## 📝 Author
 
-**[Your Name]**
+**Bryan Chan**
 *Backend Developer & QC Enthusiast*
-
-```
-```
