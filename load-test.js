@@ -28,4 +28,8 @@ export default function () {
   });
 
   sleep(1);
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 12a4c96 (updated load-test)
