@@ -98,7 +98,7 @@ The system demonstrated exceptional resilience and high throughput:
 
 ```bash
 # Clone the repo
-git clone <YOUR_REPO_URL>
+git clone <REPO_URL>
 
 # Start Docker containers
 docker-compose up -d --build
