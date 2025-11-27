@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microservices Dashboard 🚀</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        body { font-family: 'JetBrains Mono', monospace; background-color: #0f172a; color: #e2e8f0; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(148, 163, 184, 0.1); }
+        .flow-line { height: 2px; background: #475569; width: 100px; margin: 0 15px; position: relative; }
+        .flow-line.active { background: #10b981; box-shadow: 0 0 10px #10b981; transition: 1s; }
+        .step-icon { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #1e293b; border: 2px solid #475569; transition: 0.3s; }
+        .step-icon.active { border-color: #10b981; color: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); transform: scale(1.1); }
+    </style>
+</head>
+<body class="h-screen flex flex-col items-center justify-center p-5">
+
+    <div class="text-center mb-10">
+        <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">
+            E-Commerce Order System
+        </h1>
+        <p class="text-slate-400">Hybrid Microservices Architecture Demo</p>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-8 w-full max-w-5xl">
+        
+        <div class="glass-panel p-8 rounded-2xl flex-1 flex flex-col items-center justify-center shadow-2xl">
+            <div class="w-full max-w-xs text-center">
+                <div class="bg-slate-800 p-4 rounded-lg mb-5 border border-slate-700">
+                    <i class="fa-solid fa-box-open text-4xl text-orange-400 mb-2"></i>
+                    <h3 class="text-lg font-bold">Premium Widget</h3>
+                    <p class="text-sm text-slate-400">ID: #9921</p>
+                </div>
+
+                <label class="block text-left text-xs text-slate-400 mb-1">TOTAL HARGA (IDR)</label>
+                <input type="number" id="amountInput" value="500000" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white focus:border-cyan-400 focus:outline-none mb-4 text-center font-bold text-lg">
+                
+                <button onclick="startCheckout()" id="btnCheckout" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-3 px-6 rounded-lg transition-all transform active:scale-95 shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-cart-shopping mr-2"></i> CHECKOUT NOW
+                </button>
+            </div>
+        </div>
+
+        <div class="glass-panel p-8 rounded-2xl flex-[1.5] flex flex-col justify-between relative overflow-hidden">
+            <h3 class="text-xl font-bold mb-6 border-b border-slate-700 pb-2"><i class="fa-solid fa-network-wired mr-2 text-cyan-400"></i>System Flow</h3>
+
+            <div class="flex items-center justify-between mb-8 px-4">
+                <div class="flex flex-col items-center relative z-10">
+                    <div id="icon-laravel" class="step-icon"><i class="fa-brands fa-laravel text-xl"></i></div>
+                    <span class="text-xs mt-2 text-slate-400 font-bold">Laravel</span>
+                </div>
+
+                <div id="line-1" class="flow-line flex-1"></div>
+
+                <div class="flex flex-col items-center relative z-10">
+                    <div id="icon-mysql" class="step-icon"><i class="fa-solid fa-database text-xl"></i></div>
+                    <span class="text-xs mt-2 text-slate-400 font-bold">MySQL</span>
+                </div>
+
+                <div id="line-2" class="flow-line flex-1 border-t-2 border-dashed border-slate-600 bg-transparent h-0"></div>
+
+                <div class="flex flex-col items-center relative z-10">
+                    <div id="icon-node" class="step-icon"><i class="fa-brands fa-node-js text-xl"></i></div>
+                    <span class="text-xs mt-2 text-slate-400 font-bold">Node.js</span>
+                </div>
+            </div>
+
+            <div class="bg-black/50 rounded-lg p-4 font-mono text-xs h-40 overflow-y-auto border border-slate-700" id="consoleLog">
+                <div class="text-slate-500">System ready. Waiting for transaction...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const logBox = document.getElementById('consoleLog');
+        
+        function addLog(message, type = 'info') {
+            const colors = {
+                info: 'text-slate-300',
+                success: 'text-emerald-400',
+                process: 'text-yellow-400',
+                error: 'text-red-400'
+            };
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            const div = document.createElement('div');
+            div.className = `mb-1 ${colors[type]}`;
+            div.innerHTML = `<span class="text-slate-600">[${time}]</span> ${message}`;
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function animateStep(step) {
+            // Reset
+            document.querySelectorAll('.step-icon').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.flow-line').forEach(el => el.classList.remove('active'));
+
+            if(step >= 1) {
+                document.getElementById('icon-laravel').classList.add('active');
+                addLog('⚡ Request received by Laravel API', 'info');
+            }
+            if(step >= 2) {
+                setTimeout(() => {
+                    document.getElementById('line-1').classList.add('active');
+                    document.getElementById('icon-mysql').classList.add('active');
+                    addLog('💾 Laravel opens transaction to MySQL...', 'process');
+                }, 500);
+            }
+            if(step >= 3) {
+                setTimeout(() => {
+                    document.getElementById('line-2').classList.add('active');
+                    document.getElementById('icon-node').classList.add('active');
+                    addLog('📡 Async HTTP call sent to Node.js Microservice', 'process');
+                }, 1200);
+            }
+        }
+
+        async function startCheckout() {
+            const amount = document.getElementById('amountInput').value;
+            const btn = document.getElementById('btnCheckout');
+            
+            // UI State: Loading
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> PROCESSING...';
+            logBox.innerHTML = ''; // Clear logs
+            
+            animateStep(1); // Start Animation
+
+            try {
+                // Simulate Delay for visual effect (Optional)
+                await new Promise(r => setTimeout(r, 800)); 
+                animateStep(2); // MySQL
+
+                const response = await fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ total: amount })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    animateStep(3); // Node.js
+                    setTimeout(() => {
+                        addLog(`✅ <b>SUCCESS!</b> Order ID: #${data.order_id}`, 'success');
+                        addLog(`📝 Log recorded in MongoDB via Node.js`, 'success');
+                        btn.innerHTML = '<i class="fa-solid fa-check"></i> DONE';
+                        btn.classList.replace('from-blue-600', 'from-emerald-600');
+                        btn.classList.replace('to-cyan-600', 'to-emerald-500');
+                        
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fa-solid fa-cart-shopping mr-2"></i> CHECKOUT AGAIN';
+                            btn.classList.replace('from-emerald-600', 'from-blue-600');
+                            btn.classList.replace('to-emerald-500', 'to-cyan-600');
+                        }, 3000);
+                    }, 1500);
+                } else {
+                    throw new Error(data.message || 'Unknown error');
+                }
+
+            } catch (error) {
+                addLog(`❌ ERROR: ${error.message}`, 'error');
+                btn.disabled = false;
+                btn.innerHTML = 'TRY AGAIN';
+            }
+        }
+    </script>
+</body>
+</html>
