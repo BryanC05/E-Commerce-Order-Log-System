@@ -78,6 +78,11 @@ docker compose exec laravel-app php artisan migrate
 docker compose exec laravel-app php artisan install:api
 ```
 
+4. Access the Dashboard (UI) 🖥️
+Open your browser and visit: 👉 http://localhost:8000/dashboard.html
+
+This dashboard simulates the frontend application. You can click the "Checkout Now" button to trigger a transaction and watch the logs appear in real-time via WebSockets.
+
 -----
 
 ## 📡 API Documentation
