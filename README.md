@@ -1,16 +1,16 @@
 ![CI Status](https://github.com/BryanC05/E-Commerce-Order-Log-System/actions/workflows/main.yml/badge.svg)
-
+````markdown
 # Hybrid E-Commerce Order & Log System 🚀
 
-![Status](https://img.shields.io/badge/status-ready-success)
+![CI Status](https://github.com/BryanC05/E-Commerce-Order-Log-System/actions/workflows/main.yml/badge.svg)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)
 ![Laravel](https://img.shields.io/badge/laravel-%23FF2D20.svg?style=flat&logo=laravel&logoColor=white)
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F.svg?style=flat&logo=node.js&logoColor=white)
 ![k6](https://img.shields.io/badge/k6-load%20testing-purple)
 
-A high-performance backend system demonstrating a **Hybrid Microservices Architecture**.
+A production-ready backend system demonstrating a **Hybrid Microservices Architecture**.
 
-This project integrates **Laravel (MySQL)** for transactional integrity and **Node.js (MongoDB)** for high-volume asynchronous logging. The entire infrastructure is containerized via Docker Compose and has been stress-tested using **k6**.
+This project integrates **Laravel (MySQL)** for transactional integrity and **Node.js (MongoDB)** for high-volume asynchronous logging. The infrastructure is containerized via Docker Compose and features an automated **CI/CD Pipeline** with **k6 Load Testing**.
 
 ---
 
@@ -18,11 +18,11 @@ This project integrates **Laravel (MySQL)** for transactional integrity and **No
 
 The system consists of two distinct services communicating via an internal Docker network:
 
-1.  **Transactional Service (Laravel + MySQL):** Handles User Checkout. Ensures ACID compliance for financial data.
-2.  **Logging Service (Node.js + MongoDB):** Handles Activity Logging. Captures high-volume system events asynchronously to avoid blocking the main thread.
+1.  **Main Service (Laravel + MySQL):** Handles User Checkout. Ensures ACID compliance for financial data.
+2.  **Log Service (Node.js + MongoDB):** Handles Activity Logging. Captures high-volume system events asynchronously via HTTP requests.
 
 **Data Flow:**
-```bash
+```mermaid
 [ Client ] ──(POST /checkout)──▶ [ Laravel API ] ────(SQL Transaction)───▶ [ MySQL ]
                                       │
                                       ▼
@@ -30,57 +30,7 @@ The system consists of two distinct services communicating via an internal Docke
                                       │
                                       ▼
                                 [ Node.js Service ] ──(Write Log)──▶ [ MongoDB ]
-```
------
-
-## 🧪 Quality Assurance & Performance (QC)
-
-To ensure system stability under high traffic, I implemented an automated load testing suite using **k6 by Grafana**.
-
-### Load Test Scenario
-
-  * **Objective:** Stress test the Checkout Endpoint (`/api/checkout`) to verify Docker container stability and database locking mechanisms.
-  * **Virtual Users (VUs):** 50 concurrent users.
-  * **Duration:** 30 seconds.
-
-### Test Script (`load-test.js`)
-
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-
-export const options = {
-  vus: 50,
-  duration: '30s',
-};
-
-export default function () {
-  const url = 'http://localhost:8000/api/checkout';
-  const payload = JSON.stringify({ total: 150000 });
-  const params = { headers: { 'Content-Type': 'application/json' } };
-
-  const res = http.post(url, payload, params);
-
-  check(res, {
-    'status is 200': (r) => r.status === 200,
-    'transaction success': (r) => r.body.includes('success'),
-  });
-
-  sleep(1);
-}
-
-
-### 📊 Benchmark Results
-
-The system demonstrated exceptional resilience and high throughput:
-
-| Metric | Result |
-| :--- | :--- |
-| **Total Requests** | **72,374** completed transactions |
-| **Duration** | 30 Seconds |
-| **Throughput** | **\~2,412 Requests Per Second (RPS)** |
-| **Failed Requests** | 0.00% |
-
-> **Insight:** By offloading logging to Node.js, the main Laravel application maintained a response time of under 200ms even under heavy load, proving the efficiency of the hybrid architecture.
+````
 
 -----
 
@@ -91,39 +41,108 @@ The system demonstrated exceptional resilience and high throughput:
   * **Databases:** MySQL 8.0 & MongoDB
   * **DevOps:** Docker & Docker Compose
   * **Testing:** k6 (Performance), Postman (API Automation)
+  * **CI/CD:** GitHub Actions
 
 -----
 
-## ⚡️ How to Run
+## 🚀 How to Run
 
-### 1\. Start the Environment
+You don't need to install PHP, Node, or MySQL locally. **You only need Docker.**
 
-```bash
-# Clone the repo
-git clone <REPO_URL>
-
-# Start Docker containers
-docker-compose up -d --build
-```
-
-### 2\. Setup Database (First run only)
+### 1\. Clone the Repository
 
 ```bash
-docker-compose exec laravel-app php artisan migrate
-docker-compose exec laravel-app php artisan install:api
+git clone [https://github.com/BryanC05/E-Commerce-Order-Log-System.git](https://github.com/BryanC05/E-Commerce-Order-Log-System.git)
+cd E-Commerce-Order-Log-System
 ```
 
-### 3\. Run the Load Test (Optional)
-
-If you have **k6** installed locally:
+### 2\. Start Containers
 
 ```bash
-k6 run load-test.js
+docker compose up -d --build
 ```
+
+*Wait for a few minutes for the initial build and image download.*
+
+### 3\. Setup Laravel (First Time Only)
+
+Run these commands to prepare the Laravel application inside the container:
+
+```bash
+# Fix permissions & Install dependencies
+docker compose exec laravel-app chmod -R 777 storage bootstrap/cache
+docker compose exec laravel-app composer install
+
+# Setup Application
+docker compose exec laravel-app php artisan key:generate
+docker compose exec laravel-app php artisan migrate
+docker compose exec laravel-app php artisan install:api
+```
+
+-----
+
+## 📡 API Documentation
+
+### 1\. Checkout (Main Feature)
+
+Simulates a user purchasing an item. This triggers a write operation to MySQL and automatically sends a log to the Node.js service.
+
+  * **Endpoint:** `POST http://localhost:8000/api/checkout`
+
+  * **Content-Type:** `application/json`
+
+  * **Body:**
+
+    ```json
+    {
+        "total": 500000
+    }
+    ```
+
+  * **Success Response:**
+
+    ```json
+    {
+        "status": "success",
+        "message": "Order berhasil disimpan di MySQL & Log tercatat di MongoDB!",
+        "order_id": 1
+    }
+    ```
+
+-----
+
+## 🧪 Quality Assurance & Performance (QC)
+
+To ensure system stability under high traffic, I implemented an automated load testing suite using **k6 by Grafana**.
+
+### Automated CI/CD Pipeline
+
+Every push to the `main` branch triggers a GitHub Actions workflow that:
+
+1.  Builds the Docker environment.
+2.  Runs database migrations.
+3.  **Executes the k6 Load Test** to verify performance.
+
+### Benchmark Results
+
+Running `load-test.js` with **50 Concurrent Users** for 30 seconds:
+
+| Metric | Result |
+| :--- | :--- |
+| **Total Requests** | **\~72,000** completed transactions |
+| **Throughput** | **\~2,400 Requests Per Second (RPS)** |
+| **Failed Requests** | **0.00%** (Zero Downtime) |
+| **Avg Latency** | \< 200ms |
+
+> **Insight:** By offloading logging to Node.js, the main Laravel application remains lightweight and responsive even under heavy load.
 
 -----
 
 ## 📝 Author
 
-**Bryan Chan**
+**Bryan**
+*Backend & QC Enthusiast*
+
+```
+```
 *Backend Developer & QC Enthusiast*
