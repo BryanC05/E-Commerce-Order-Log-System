@@ -22,7 +22,7 @@ The system consists of two distinct services communicating via an internal Docke
 2.  **Log Service (Node.js + MongoDB):** Handles Activity Logging. Captures high-volume system events asynchronously via HTTP requests.
 
 **Data Flow:**
-```mermaid
+````markdown
 [ Client ] ──(POST /checkout)──▶ [ Laravel API ] ────(SQL Transaction)───▶ [ MySQL ]
                                       │
                                       ▼
@@ -30,7 +30,7 @@ The system consists of two distinct services communicating via an internal Docke
                                       │
                                       ▼
                                 [ Node.js Service ] ──(Write Log)──▶ [ MongoDB ]
-```
+````
 -----
 
 ## 🛠 Tech Stack
