@@ -134,7 +134,8 @@
                 await new Promise(r => setTimeout(r, 800)); 
                 animateStep(2); // MySQL
 
-                const response = await fetch('/api/checkout', {
+                // Tembak ke Port 9000 (Chaos Proxy)
+            const response = await fetch('http://localhost:9000/api/checkout', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
