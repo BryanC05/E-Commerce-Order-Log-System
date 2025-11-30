@@ -1,5 +1,3 @@
-![CI Status](https://github.com/BryanC05/E-Commerce-Order-Log-System/actions/workflows/main.yml/badge.svg)
-
 # Hybrid E-Commerce Order & Log System 🚀
 
 ![CI Status](https://github.com/BryanC05/E-Commerce-Order-Log-System/actions/workflows/main.yml/badge.svg)
