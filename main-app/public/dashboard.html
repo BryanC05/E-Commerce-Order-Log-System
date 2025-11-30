@@ -6,6 +6,7 @@
     <title>Microservices Dashboard 🚀</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
         body { font-family: 'JetBrains Mono', monospace; background-color: #0f172a; color: #e2e8f0; }
@@ -170,6 +171,24 @@
                 btn.innerHTML = 'TRY AGAIN';
             }
         }
+        // --- SOCKET IO SETUP ---
+        // Konek ke Service Node.js (Port 3000)
+        const socket = io("http://localhost:3000");
+        
+        socket.on("connect", () => {
+            addLog("🟢 Connected to Real-time Log Stream", "success");
+        });
+        
+        // Saat ada event 'new_log' dari server
+        socket.on("new_log", (data) => {
+            // Tampilkan animasi notifikasi di log
+            const msg = `🔥 <b>LIVE LOG:</b> ${data.service} -> ${data.action}`;
+            addLog(msg, "process");
+        
+            // Efek visual tambahan (opsional)
+            document.getElementById('consoleLog').classList.add('border-yellow-500');
+            setTimeout(() => document.getElementById('consoleLog').classList.remove('border-yellow-500'), 500);
+        });
     </script>
 </body>
 </html>
