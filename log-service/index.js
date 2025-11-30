@@ -50,3 +50,4 @@ app.post('/logs', async (req, res) => {
 });
 
 server.listen(3000, () => console.log('Log service running on port 3000'));
+console.log('App running in: http://localhost:8000/dashboard.html');
