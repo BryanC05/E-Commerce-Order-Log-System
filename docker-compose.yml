@@ -40,6 +40,14 @@ services:
       - mongo-db
     networks:
       - app-network
+      
+  # --- CHAOS PROXY SERVICE ---
+  chaos-proxy:
+    build: ./chaos-proxy
+    ports:
+      - "9000:9000"
+    networks:
+      - app-network
 
   # --- MONGODB DATABASE ---
   mongo-db:
