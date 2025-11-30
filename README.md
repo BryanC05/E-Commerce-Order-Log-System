@@ -30,7 +30,7 @@ The system consists of two distinct services communicating via an internal Docke
                                       │
                                       ▼
                                 [ Node.js Service ] ──(Write Log)──▶ [ MongoDB ]
-
+```
 -----
 
 ## 🛠 Tech Stack
@@ -141,7 +141,3 @@ Running `load-test.js` with **50 Concurrent Users** for 30 seconds:
 
 **Bryan**
 *Backend & QC Enthusiast*
-
-```
-```
-*Backend Developer & QC Enthusiast*
