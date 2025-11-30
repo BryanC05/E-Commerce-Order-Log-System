@@ -1,5 +1,5 @@
 ![CI Status](https://github.com/BryanC05/E-Commerce-Order-Log-System/actions/workflows/main.yml/badge.svg)
-````markdown
+
 # Hybrid E-Commerce Order & Log System 🚀
 
 ![CI Status](https://github.com/BryanC05/E-Commerce-Order-Log-System/actions/workflows/main.yml/badge.svg)
@@ -30,7 +30,6 @@ The system consists of two distinct services communicating via an internal Docke
                                       │
                                       ▼
                                 [ Node.js Service ] ──(Write Log)──▶ [ MongoDB ]
-````
 
 -----
 
